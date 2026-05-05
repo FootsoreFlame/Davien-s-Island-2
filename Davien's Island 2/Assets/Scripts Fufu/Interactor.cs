@@ -10,6 +10,14 @@ public class Interactor : MonoBehaviour
     public Transform InteractorSource;
     public float InteractRange = 3f;
 
+    void Start()
+    {
+        if (InteractorSource == null)
+        {
+            InteractorSource = Camera.main.transform;
+        }
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.E))
@@ -18,7 +26,8 @@ public class Interactor : MonoBehaviour
 
             if (Physics.Raycast(ray, out RaycastHit hit, InteractRange))
             {
-                IInteractable interactable = hit.collider.GetComponent<IInteractable>();
+                IInteractable interactable =
+                    hit.collider.GetComponentInParent<IInteractable>();
 
                 if (interactable != null)
                 {

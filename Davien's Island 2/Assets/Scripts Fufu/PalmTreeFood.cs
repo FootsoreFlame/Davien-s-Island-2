@@ -1,30 +1,26 @@
 using UnityEngine;
-using System.Collections;
 
 public class PalmTreeFood : MonoBehaviour, IInteractable
 {
     public float hungerRestore = 25f;
     public float cooldownTime = 60f;
 
-    private bool canUse = true;
+    private float nextUseTime = 0f;
 
     public void Interact()
     {
-        if (!canUse) return;
+        if (Time.time < nextUseTime)
+        {
+            Debug.Log("Tree on cooldown");
+            return;
+        }
 
         HungerSystem hunger = FindObjectOfType<HungerSystem>();
 
         if (hunger != null)
         {
             hunger.AddHunger(hungerRestore);
-            StartCoroutine(Cooldown());
+            nextUseTime = Time.time + cooldownTime;
         }
-    }
-
-    IEnumerator Cooldown()
-    {
-        canUse = false;
-        yield return new WaitForSeconds(cooldownTime);
-        canUse = true;
     }
 }
