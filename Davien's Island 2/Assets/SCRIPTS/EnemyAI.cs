@@ -8,40 +8,58 @@ public class EnemyAI : MonoBehaviour
     [Header("Movement")]
     public float chaseRange = 15f;
     public float attackRange = 2f;
+    public float rotationSpeed = 5f;
 
     [Header("Attack")]
     public int damage = 10;
     public float attackCooldown = 1.5f;
 
     private float lastAttackTime;
-
     private NavMeshAgent agent;
 
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        agent.updateRotation = false;
     }
 
     void Update()
     {
+        if (player == null) return;
+
         float distance = Vector3.Distance(transform.position, player.position);
 
-        // Chase player
         if (distance <= chaseRange && distance > attackRange)
         {
             agent.isStopped = false;
             agent.SetDestination(player.position);
+            RotateTowardsPlayer();
         }
-        // Attack player
         else if (distance <= attackRange)
         {
             agent.isStopped = true;
+            RotateTowardsPlayer();
             Attack();
         }
-        // Idle
         else
         {
             agent.isStopped = true;
+        }
+    }
+
+    void RotateTowardsPlayer()
+    {
+        Vector3 direction = (player.position - transform.position);
+        direction.y = 0;
+
+        if (direction.sqrMagnitude > 0.01f)
+        {
+            Quaternion targetRotation = Quaternion.LookRotation(direction);
+            transform.rotation = Quaternion.RotateTowards(
+                transform.rotation,
+                targetRotation,
+                rotationSpeed * 100f * Time.deltaTime
+            );
         }
     }
 
@@ -51,9 +69,6 @@ public class EnemyAI : MonoBehaviour
         {
             lastAttackTime = Time.time;
 
-            Debug.Log("Enemy Attacks!");
-
-            // Try to damage player
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
 
             if (playerHealth != null)
