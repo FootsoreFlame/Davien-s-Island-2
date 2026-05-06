@@ -1,4 +1,4 @@
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
@@ -17,9 +17,13 @@ public class EnemyAI : MonoBehaviour
 
     private NavMeshAgent agent;
 
+    private MusicManager musicManager;
+    private bool isChasing = false;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
+        musicManager = FindObjectOfType<MusicManager>();
     }
 
     void Update()
@@ -31,17 +35,37 @@ public class EnemyAI : MonoBehaviour
         {
             agent.isStopped = false;
             agent.SetDestination(player.position);
+
+            // 🎵 START CHASE MUSIC (only once)
+            if (!isChasing)
+            {
+                isChasing = true;
+                musicManager.PlayChase();
+            }
         }
         // Attack player
         else if (distance <= attackRange)
         {
             agent.isStopped = true;
             Attack();
+
+            if (!isChasing)
+            {
+                isChasing = true;
+                musicManager.PlayChase();
+            }
         }
         // Idle
         else
         {
             agent.isStopped = true;
+
+            // 🎵 RETURN TO NORMAL MUSIC
+            if (isChasing)
+            {
+                isChasing = false;
+                musicManager.PlayNormal();
+            }
         }
     }
 
@@ -53,7 +77,6 @@ public class EnemyAI : MonoBehaviour
 
             Debug.Log("Enemy Attacks!");
 
-            // Try to damage player
             PlayerHealth playerHealth = player.GetComponent<PlayerHealth>();
 
             if (playerHealth != null)
