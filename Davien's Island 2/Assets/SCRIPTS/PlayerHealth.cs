@@ -9,8 +9,12 @@ public class PlayerHealth : MonoBehaviour
     public HealthBarUI healthBar;
 
     [Header("Player Components")]
-    public MonoBehaviour playerMovementScript; // drag your movement script here
+    public MonoBehaviour playerMovementScript;
+    public MonoBehaviour cameraLookScript;
     public Collider playerCollider;
+
+    [Header("UI")]
+    public GameObject deathScreen;
 
     void Start()
     {
@@ -18,6 +22,9 @@ public class PlayerHealth : MonoBehaviour
 
         if (healthBar != null)
             healthBar.SetMaxHealth(maxHealth);
+
+        if (deathScreen != null)
+            deathScreen.SetActive(false);
     }
 
     public void TakeDamage(int damage)
@@ -46,16 +53,29 @@ public class PlayerHealth : MonoBehaviour
         if (playerMovementScript != null)
             playerMovementScript.enabled = false;
 
-        // Disable collisions
+        // Stop camera look
+        if (cameraLookScript != null)
+            cameraLookScript.enabled = false;
+
+        // Disable collider
         if (playerCollider != null)
             playerCollider.enabled = false;
 
-        // Optional: freeze rigidbody if you have one
+        // Freeze Rigidbody
         Rigidbody rb = GetComponent<Rigidbody>();
+
         if (rb != null)
         {
             rb.linearVelocity = Vector3.zero;
             rb.isKinematic = true;
         }
+
+        // Show death screen
+        if (deathScreen != null)
+            deathScreen.SetActive(true);
+
+        // Unlock cursor
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 }
