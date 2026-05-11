@@ -3,7 +3,7 @@ using UnityEngine;
 public class PlayerHealth : MonoBehaviour
 {
     public int maxHealth = 100;
-    private int currentHealth;
+    private float currentHealth;
     private bool isDead = false;
 
     public HealthBarUI healthBar;
@@ -16,6 +16,11 @@ public class PlayerHealth : MonoBehaviour
     [Header("UI")]
     public GameObject deathScreen;
 
+    [Header("Hunger Healing")]
+    public HungerSystem hungerSystem;
+    public float hungerThreshold = 85f;
+    public float healRate = 5f;
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -27,6 +32,29 @@ public class PlayerHealth : MonoBehaviour
             deathScreen.SetActive(false);
     }
 
+    void Update()
+    {
+        if (isDead) return;
+
+        RegenerateHealth();
+    }
+
+    void RegenerateHealth()
+    {
+        if (hungerSystem == null) return;
+
+        float hungerPercent = (hungerSystem.currentHunger / hungerSystem.maxHunger) * 100f;
+
+        if (hungerPercent >= hungerThreshold && currentHealth < maxHealth)
+        {
+            currentHealth += healRate * Time.deltaTime;
+            currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
+
+            if (healthBar != null)
+                healthBar.SetHealth(Mathf.RoundToInt(currentHealth));
+        }
+    }
+
     public void TakeDamage(int damage)
     {
         if (isDead) return;
@@ -35,7 +63,7 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = Mathf.Clamp(currentHealth, 0, maxHealth);
 
         if (healthBar != null)
-            healthBar.SetHealth(currentHealth);
+            healthBar.SetHealth(Mathf.RoundToInt(currentHealth));
 
         if (currentHealth <= 0)
         {
@@ -49,19 +77,15 @@ public class PlayerHealth : MonoBehaviour
 
         Debug.Log("Player Died");
 
-        // Stop movement
         if (playerMovementScript != null)
             playerMovementScript.enabled = false;
 
-        // Stop camera look
         if (cameraLookScript != null)
             cameraLookScript.enabled = false;
 
-        // Disable collider
         if (playerCollider != null)
             playerCollider.enabled = false;
 
-        // Freeze Rigidbody
         Rigidbody rb = GetComponent<Rigidbody>();
 
         if (rb != null)
@@ -70,11 +94,9 @@ public class PlayerHealth : MonoBehaviour
             rb.isKinematic = true;
         }
 
-        // Show death screen
         if (deathScreen != null)
             deathScreen.SetActive(true);
 
-        // Unlock cursor
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
     }
