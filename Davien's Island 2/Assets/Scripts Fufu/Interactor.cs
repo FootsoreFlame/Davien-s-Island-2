@@ -3,6 +3,7 @@ using UnityEngine;
 public interface IInteractable
 {
     void Interact();
+    bool CanInteract();
 }
 
 public class Interactor : MonoBehaviour
@@ -42,25 +43,20 @@ public class Interactor : MonoBehaviour
     {
         currentInteractable = null;
 
-        Ray ray = new Ray(
-            InteractorSource.position,
-            InteractorSource.forward
-        );
+        Ray ray = new Ray(InteractorSource.position, InteractorSource.forward);
 
         if (Physics.Raycast(ray, out RaycastHit hit, InteractRange))
         {
             IInteractable interactable =
                 hit.collider.GetComponentInParent<IInteractable>();
 
-            if (interactable != null)
+            if (interactable != null && interactable.CanInteract())
             {
                 currentInteractable = interactable;
 
-                // Show interact text
                 if (interactTextObject != null)
                     interactTextObject.SetActive(true);
 
-                // Hide crosshair
                 if (crosshairObject != null)
                     crosshairObject.SetActive(false);
 
@@ -68,11 +64,9 @@ public class Interactor : MonoBehaviour
             }
         }
 
-        // Hide interact text
         if (interactTextObject != null)
             interactTextObject.SetActive(false);
 
-        // Show crosshair again
         if (crosshairObject != null)
             crosshairObject.SetActive(true);
     }

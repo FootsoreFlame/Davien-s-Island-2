@@ -5,30 +5,23 @@ public class PalmTreeFood : MonoBehaviour, IInteractable
     public float hungerRestore = 25f;
     public float cooldownTime = 60f;
 
-    private float nextUseTime;
+    private float nextUseTime = 0f;
 
-    private HungerSystem hunger;
-
-    void Start()
+    public bool CanInteract()
     {
-        hunger = FindObjectOfType<HungerSystem>();
+        return Time.time >= nextUseTime;
     }
 
     public void Interact()
     {
-        if (Time.time < nextUseTime)
-        {
-            Debug.Log(gameObject.name + " is on cooldown");
-            return;
-        }
+        if (!CanInteract()) return;
+
+        HungerSystem hunger = FindObjectOfType<HungerSystem>();
 
         if (hunger != null)
         {
             hunger.AddHunger(hungerRestore);
-
             nextUseTime = Time.time + cooldownTime;
-
-            Debug.Log(gameObject.name + " eaten");
         }
     }
 }

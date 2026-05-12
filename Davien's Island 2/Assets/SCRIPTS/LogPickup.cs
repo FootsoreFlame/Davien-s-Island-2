@@ -4,6 +4,11 @@ public class LogPickup : MonoBehaviour, IInteractable
 {
     public int amount = 1;
 
+    public bool CanInteract()
+    {
+        return true;
+    }
+
     public void Interact()
     {
         Inventory inv = FindObjectOfType<Inventory>();
@@ -12,10 +17,6 @@ public class LogPickup : MonoBehaviour, IInteractable
         {
             inv.AddLogs(amount);
             Destroy(gameObject);
-        }
-        else
-        {
-            Debug.LogWarning("No Inventory found in scene.");
         }
     }
 }
