@@ -4,6 +4,13 @@ public class LogPickup : MonoBehaviour, IInteractable
 {
     public int amount = 1;
 
+    private InventoryUI inventoryUI;
+
+    void Start()
+    {
+        inventoryUI = FindObjectOfType<InventoryUI>();
+    }
+
     public bool CanInteract()
     {
         return true;
@@ -11,11 +18,9 @@ public class LogPickup : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        Inventory inv = FindObjectOfType<Inventory>();
-
-        if (inv != null)
+        if (inventoryUI != null)
         {
-            inv.AddLogs(amount);
+            inventoryUI.AddLogs(amount);
             Destroy(gameObject);
         }
     }

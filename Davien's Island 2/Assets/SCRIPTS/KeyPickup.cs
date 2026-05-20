@@ -1,18 +1,25 @@
 using UnityEngine;
 
-public class KeyPickup : MonoBehaviour
+public class KeyPickup : MonoBehaviour, IInteractable
 {
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            Inventory inv = other.GetComponent<Inventory>();
+    private InventoryUI inventoryUI;
 
-            if (inv != null)
-            {
-                inv.GetKey();
-                Destroy(gameObject);
-            }
+    void Start()
+    {
+        inventoryUI = FindObjectOfType<InventoryUI>();
+    }
+
+    public bool CanInteract()
+    {
+        return true;
+    }
+
+    public void Interact()
+    {
+        if (inventoryUI != null)
+        {
+            inventoryUI.GetKey();
+            Destroy(gameObject);
         }
     }
 }

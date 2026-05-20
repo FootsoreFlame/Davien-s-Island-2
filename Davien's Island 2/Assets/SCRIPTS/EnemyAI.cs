@@ -10,6 +10,9 @@ public class EnemyAI : MonoBehaviour
     public float attackRange = 3f;
     public float rotationSpeed = 8f;
 
+    [Header("Music")]
+    public float chaseMusicRange = 40f;
+
     [Header("Attack")]
     public int damage = 15;
     public float attackCooldown = 2f;
@@ -20,12 +23,15 @@ public class EnemyAI : MonoBehaviour
     private float lastAttackTime;
     private NavMeshAgent agent;
 
+    private MusicManager musicManager;
+    private bool isChaseMusicPlaying = false;
+
     void Start()
     {
         agent = GetComponent<NavMeshAgent>();
-
-        // Stops NavMeshAgent from forcing weird rotation
         agent.updateRotation = false;
+
+        musicManager = FindObjectOfType<MusicManager>();
 
         if (animator == null)
             animator = GetComponentInChildren<Animator>();
@@ -36,6 +42,8 @@ public class EnemyAI : MonoBehaviour
         if (player == null) return;
 
         float distance = Vector3.Distance(transform.position, player.position);
+
+        HandleMusic(distance);
 
         if (distance <= chaseRange && distance > attackRange)
         {
@@ -63,6 +71,28 @@ public class EnemyAI : MonoBehaviour
 
             if (animator != null)
                 animator.SetBool("IsWalking", false);
+        }
+    }
+
+    void HandleMusic(float distance)
+    {
+        if (musicManager == null) return;
+
+        if (distance <= chaseMusicRange)
+        {
+            if (!isChaseMusicPlaying)
+            {
+                isChaseMusicPlaying = true;
+                musicManager.PlayChase();
+            }
+        }
+        else
+        {
+            if (isChaseMusicPlaying)
+            {
+                isChaseMusicPlaying = false;
+                musicManager.PlayNormal();
+            }
         }
     }
 

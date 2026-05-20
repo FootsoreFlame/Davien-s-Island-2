@@ -1,18 +1,28 @@
 using UnityEngine;
 
-public class BlueprintPickup : MonoBehaviour
+public class BlueprintPickup : MonoBehaviour, IInteractable
 {
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            Inventory inv = other.GetComponent<Inventory>();
+    private InventoryUI inventoryUI;
 
-            if (inv != null)
-            {
-                inv.GetBlueprint();
-                Destroy(gameObject);
-            }
+    void Start()
+    {
+        inventoryUI = FindObjectOfType<InventoryUI>();
+    }
+
+    public bool CanInteract()
+    {
+        return true;
+    }
+
+    public void Interact()
+    {
+        if (inventoryUI != null)
+        {
+            inventoryUI.GetBlueprint();
+
+            Debug.Log("Blueprint Collected!");
+
+            Destroy(gameObject);
         }
     }
 }

@@ -1,31 +1,59 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
-public class RaftBuilder : MonoBehaviour
+public class RaftBuilder : MonoBehaviour, IInteractable
 {
     public int logsNeeded = 10;
     private int currentLogs = 0;
 
     public GameObject completedRaft;
 
-    private bool playerNearby = false;
-    private Inventory playerInventory;
+    [Header("Blueprint Popup")]
+    public GameObject needBlueprintPopup;
+    public float blueprintPopupTime = 2f;
 
-    void Update()
+    [Header("Logs Popup")]
+    public GameObject logsPopup;
+    public float logsPopupTime = 2f;
+
+    private Text logsText;
+    private InventoryUI playerInventory;
+
+    void Start()
     {
-        if (playerNearby && Input.GetKeyDown(KeyCode.E))
+        playerInventory = FindObjectOfType<InventoryUI>();
+
+        if (completedRaft != null)
+            completedRaft.SetActive(false);
+
+        if (needBlueprintPopup != null)
+            needBlueprintPopup.SetActive(false);
+
+        if (logsPopup != null)
         {
-            TryBuild();
+            logsText = logsPopup.GetComponentInChildren<Text>(true);
+            logsPopup.SetActive(false);
         }
+    }
+
+    public bool CanInteract()
+    {
+        return currentLogs < logsNeeded;
+    }
+
+    public void Interact()
+    {
+        TryBuild();
     }
 
     void TryBuild()
     {
         if (playerInventory == null) return;
 
-        // 🚨 REQUIRE BLUEPRINT FIRST
         if (!playerInventory.hasBlueprint)
         {
-            Debug.Log("You need the blueprint first!");
+            StartCoroutine(ShowBlueprintPopup());
             return;
         }
 
@@ -33,7 +61,7 @@ public class RaftBuilder : MonoBehaviour
         {
             currentLogs++;
 
-            Debug.Log("Logs in raft: " + currentLogs + "/" + logsNeeded);
+            StartCoroutine(ShowLogsPopup());
 
             if (currentLogs >= logsNeeded)
             {
@@ -42,28 +70,57 @@ public class RaftBuilder : MonoBehaviour
         }
     }
 
+    IEnumerator ShowBlueprintPopup()
+    {
+        Interactor interactor = FindObjectOfType<Interactor>();
+
+        if (interactor != null)
+            interactor.BlockInteractionUI(blueprintPopupTime);
+
+        if (needBlueprintPopup != null)
+            needBlueprintPopup.SetActive(true);
+
+        yield return new WaitForSeconds(blueprintPopupTime);
+
+        if (needBlueprintPopup != null)
+            needBlueprintPopup.SetActive(false);
+    }
+
+    IEnumerator ShowLogsPopup()
+    {
+        Interactor interactor = FindObjectOfType<Interactor>();
+
+        if (interactor != null)
+            interactor.BlockInteractionUI(logsPopupTime);
+
+        if (logsPopup != null)
+            logsPopup.SetActive(true);
+
+        if (logsText == null && logsPopup != null)
+            logsText = logsPopup.GetComponentInChildren<Text>(true);
+
+        if (logsText != null)
+            logsText.text = "Logs Submitted: " + currentLogs + " / " + logsNeeded;
+
+        yield return new WaitForSeconds(logsPopupTime);
+
+        if (logsPopup != null)
+            logsPopup.SetActive(false);
+    }
+
     void CompleteRaft()
     {
         Debug.Log("Raft Complete!");
 
-        completedRaft.SetActive(true);
+        // Hide logs popup
+        if (logsPopup != null)
+            logsPopup.SetActive(false);
+
+        // Show completed raft
+        if (completedRaft != null)
+            completedRaft.SetActive(true);
+
+        // Disable schematic/build raft
         gameObject.SetActive(false);
-    }
-
-    void OnTriggerEnter(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerNearby = true;
-            playerInventory = other.GetComponent<Inventory>();
-        }
-    }
-
-    void OnTriggerExit(Collider other)
-    {
-        if (other.CompareTag("Player"))
-        {
-            playerNearby = false;
-        }
     }
 }

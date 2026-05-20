@@ -1,4 +1,6 @@
 using UnityEngine;
+using UnityEngine.UI;
+using System.Collections;
 
 public interface IInteractable
 {
@@ -13,9 +15,11 @@ public class Interactor : MonoBehaviour
 
     [Header("UI")]
     public GameObject interactTextObject;
+    public Text interactText;
     public GameObject crosshairObject;
 
     private IInteractable currentInteractable;
+    private bool interactionUIBlocked = false;
 
     void Start()
     {
@@ -39,6 +43,26 @@ public class Interactor : MonoBehaviour
         }
     }
 
+    public void BlockInteractionUI(float duration)
+    {
+        StartCoroutine(BlockInteractionUICoroutine(duration));
+    }
+
+    IEnumerator BlockInteractionUICoroutine(float duration)
+    {
+        interactionUIBlocked = true;
+
+        if (interactTextObject != null)
+            interactTextObject.SetActive(false);
+
+        if (crosshairObject != null)
+            crosshairObject.SetActive(false);
+
+        yield return new WaitForSeconds(duration);
+
+        interactionUIBlocked = false;
+    }
+
     void CheckForInteractable()
     {
         currentInteractable = null;
@@ -54,20 +78,29 @@ public class Interactor : MonoBehaviour
             {
                 currentInteractable = interactable;
 
-                if (interactTextObject != null)
-                    interactTextObject.SetActive(true);
+                if (!interactionUIBlocked)
+                {
+                    if (interactText != null)
+                        interactText.text = "Press E to Interact";
 
-                if (crosshairObject != null)
-                    crosshairObject.SetActive(false);
+                    if (interactTextObject != null)
+                        interactTextObject.SetActive(true);
+
+                    if (crosshairObject != null)
+                        crosshairObject.SetActive(false);
+                }
 
                 return;
             }
         }
 
-        if (interactTextObject != null)
-            interactTextObject.SetActive(false);
+        if (!interactionUIBlocked)
+        {
+            if (interactTextObject != null)
+                interactTextObject.SetActive(false);
 
-        if (crosshairObject != null)
-            crosshairObject.SetActive(true);
+            if (crosshairObject != null)
+                crosshairObject.SetActive(true);
+        }
     }
 }
