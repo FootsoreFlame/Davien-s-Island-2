@@ -1,24 +1,42 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 
-public class SceneLoader : MonoBehaviour
+public class MainMenuStart : MonoBehaviour
 {
-    // Load a scene by name (use this for buttons)
-    public void LoadScene(string sceneName)
+    [Header("Gameplay UI")]
+    public GameObject gameplayUI;
+
+    void Start()
     {
-        SceneManager.LoadScene(sceneName);
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+
+        Time.timeScale = 0f;
+
+        // Hide gameplay UI at start
+        if (gameplayUI != null)
+            gameplayUI.SetActive(false);
     }
 
-    // Optional: directly load your game scene
-    public void LoadGame()
+    void Update()
     {
-        SceneManager.LoadScene("GameScene"); // change this to your scene name
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            StartGame();
+        }
     }
 
-    // Optional: quit the game (use for exit button)
-    public void QuitGame()
+    void StartGame()
     {
-        Application.Quit();
-        Debug.Log("Game Closed"); // shows in editor
+        Time.timeScale = 1f;
+
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+
+        // Turn gameplay UI on
+        if (gameplayUI != null)
+            gameplayUI.SetActive(true);
+
+        // Hide main menu
+        gameObject.SetActive(false);
     }
 }
