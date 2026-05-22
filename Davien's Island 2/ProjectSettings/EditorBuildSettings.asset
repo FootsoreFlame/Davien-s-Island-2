@@ -6,9 +6,6 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/Main Menu.unity
-    guid: 0c53244a1936b9e469598fdafa4c85ed
-  - enabled: 1
     path: Assets/Free Island Collection/Scenes/dAVIENS CAVE.unity
     guid: cb1eeb1289995584188855ac34a547f5
   m_configObjects:
